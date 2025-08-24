@@ -5,14 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a323d4c0-1672-4316-b6c7-2ab056d6ce76" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/IKT213_Evensen-assignment_1.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/assignment_1.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/camera_outputs.txt.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lena-1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/img.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assignment_1.py" beforeDir="false" afterPath="$PROJECT_DIR$/assignment_1.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/camera_output.txt" beforeDir="false" afterPath="$PROJECT_DIR$/camera_output.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/camera_outputs.txt.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -1,35 +1,44 @@
-import numpy as np
 import cv2
+import os
 
-# Reads the image information
-img = cv2.imread('lena-1.png',1)
+def print_image_information(image):
 
-def print_image_informations(img):
-    print("Image height: ", img.shape[0])
-    print("Image width: ", img.shape[1])
-    print("Image channels ", img.shape[2] if len(img.shape) == 3 else 1)
-    print("Image data type: ", img.dtype)
-    print("Image size:", img.size, "bytes")
+    h, w = image.shape[:2]
+    c = image.shape[2] if len(image.shape) == 3 else 1
+    print("Image height:", h)
+    print("Image width:", w)
+    print("Image channels:", c)
+    print("Image size (number of values):", image.size)
+    print("Image data type:", image.dtype)
 
-    if len (img.shape) == 3:
-        print("Blue channel sample:", img[0:3, 0:3, 0])
-        print ("Green channel sample:", img[0:3, 0:3, 1])
-        print ("Red channel sample:", img[0:3, 0:3, 2])
+def save_camera_information():
+
+    cap = cv2.VideoCapture(0)
+
+    fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    out_dir = os.path.expanduser("~/IKT213_MacBook_Pro_M1/assignment_1/solutions")
+    os.makedirs(out_dir, exist_ok=True)
+
+    with open(os.path.join(out_dir, "camera_outputs.txt"), "w") as f:
+        f.write(f"fps: {fps}\n")
+        f.write(f"height: {height}\n")
+        f.write(f"width: {width}\n")
+
+    print("Camera information saved!")
+
+    cap.release()
+
+def main():
+
+    img = cv2.imread("lena-1.png")
+    if img is not None:
+        print_image_information(img)
 
 
-print_image_informations(img)
+    save_camera_information()
 
-
-
-video_capture = cv2.VideoCapture(0)
-
-frame_width = int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
-frame_height = int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-fps = video_capture.get(cv2.CAP_PROP_FPS)
-
-output_file = "camera_output.txt"
-
-with open(output_file, "w") as f:
-    f.write("Frame width: " + str(frame_width) + "\n")
-    f.write("Frame height: " + str(frame_height) + "\n")
-    f.write("FPS: " + str(fps) + "\n")
+if __name__ == "__main__":
+    main()
