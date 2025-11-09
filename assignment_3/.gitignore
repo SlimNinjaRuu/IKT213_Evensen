@@ -1,0 +1,19 @@
+
+---
+
+### `assignment_3/.gitignore`
+> We **do not** ignore `outputs/` here because you need to submit those image files.
+```gitignore
+# Virtual env
+.venv/
+# PyCharm / VSCode / IDE
+.idea/
+.vscode/
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+# OS junk
+.DS_Store
+Thumbs.db
