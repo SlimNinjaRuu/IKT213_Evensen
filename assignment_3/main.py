@@ -54,12 +54,11 @@ def save_img(img: np.ndarray, name: str) -> Path:
 
 def sobel_edge_detection(image: np.ndarray) -> np.ndarray:
 
-    blurred = cv2.GaussianBlur(image, (3, 3), 0)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    blurred = cv2.GaussianBlur(gray, (3, 3), 0, cv2.BORDER_DEFAULT)
     gray = cv2.cvtColor(blurred, cv2.COLOR_BGR2GRAY) if blurred.ndim == 3 else blurred
-    sobel_64f = cv2.Sobel(gray, ddepth=cv2.CV_64F, dx=1, dy=1, ksize=1)
-    sobel_abs = np.absolute(sobel_64f)
-    sobel_u8 = np.uint8(np.clip(sobel_abs, 0, 255))
-    return sobel_u8
+    sobel_64f = 255 * cv2.Sobel(gray, ddepth=cv2.CV_64F, dx=1, dy=1, ksize=1)
+    return sobel_64f
 
 
 def canny_edge_detection(image: np.ndarray, threshold_1: int = 50, threshold_2: int = 50) -> np.ndarray:
