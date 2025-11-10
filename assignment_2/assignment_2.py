@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-# func
+
 
 def padding(image, border_width=100):
 
@@ -19,6 +19,10 @@ def cropping(image, x_0, x_1, y_0, y_1):
         raise ValueError("Invalid crop box after clamping")
     return image[y0:y1, x0:x1].copy()
 
+
+def crop(image, x_0, x_1, y_0, y_1):
+    return cropping(image, x_0, x_1, y_0, y_1)
+
 def resize_image(image, width, height, interp=cv2.INTER_LINEAR):
 
     return cv2.resize(image, (int(width), int(height)), interpolation=interp)
@@ -33,7 +37,7 @@ def copy(image, empty_image):
 
     for y in range(h):
         for x in range(w):
-            # B, G, R channels
+            # B, G, R
             empty_image[y, x, 0] = image[y, x, 0]
             empty_image[y, x, 1] = image[y, x, 1]
             empty_image[y, x, 2] = image[y, x, 2]
@@ -42,140 +46,131 @@ def copy(image, empty_image):
 def grayscale(image):
 
     if image is None:
-        raise ValueError("image cannot be None")
+        raise ValueError("image cannot be none")
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
+def hsv(image):
 
-
-
-def hvs(image):
     if image is None:
         raise ValueError("image cannot be None")
-
     if len(image.shape) == 2 or image.shape[2] == 1:
         image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-
     return cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-#load color image
-image = cv2.imread("lena-1.png", cv2.IMREAD_COLOR)
-if image is None:
-    raise FileNotFoundError("No image")
 
-
-hvs_image = hvs(image)
-cv2.imwrite("out_HSV.png", hvs_image)
-
-preview_bgr = cv2.cvtColor(hvs_image, cv2.COLOR_HSV2BGR)
-
-cv2.imshow('Original (BGR)', image)
-cv2.imshow('HSV image', preview_bgr)
-
-
+hvs = hsv
 
 def hue_shifted(image, emptyPictureArray, hue=50):
+
     if image is None:
         raise ValueError("image is no where to be found")
     if emptyPictureArray.shape != image.shape or emptyPictureArray.dtype != np.uint8:
         raise ValueError("emptyPictureArray must be shape (h, w, 3) and dtype uint8")
 
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    # BGR -> RGB
+    rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-    h, s, v = cv2.split(hsv)
+    # +hue to all channels with wrap-around
+    shifted_rgb = (rgb.astype(np.int16) + int(hue)) % 256
+    shifted_rgb = shifted_rgb.astype(np.uint8)
 
-    h = (h.astype(np.int16) + hue) % 256 # limit
-    h = h.astype(np.uint8)
-
-    hsv_shifted = cv2.merge((h, s, v))
-
-    shifted_bgr = cv2.cvtColor(hsv_shifted, cv2.COLOR_HSV2BGR)
+    # RGB -> BGR
+    shifted_bgr = cv2.cvtColor(shifted_rgb, cv2.COLOR_RGB2BGR)
 
     np.copyto(emptyPictureArray, shifted_bgr)
-
     return emptyPictureArray
 
 def smoothing(image):
+
     if image is None:
         raise ValueError("image is no where to be found")
-
-    blurred = cv2.GaussianBlur(image, (11, 11), 0, borderType=cv2.BORDER_DEFAULT)
-    return blurred
-
+    return cv2.GaussianBlur(image, (15, 15), 0, borderType=cv2.BORDER_DEFAULT)
 
 def rotation(image, rotation_angle):
+
     if image is None:
         raise ValueError("image is no where to be found")
-
     if rotation_angle == 180:
         rotated = cv2.rotate(image, cv2.ROTATE_180)
     elif rotation_angle == 90:
         rotated = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
     else:
-        raise ValueError("Invalid rotation angle")
-
+        raise ValueError("Invalid rotation angle (use 90 or 180)")
     return rotated
 
 
-img = cv2.imread("lena-1.png", cv2.IMREAD_COLOR)
-if img is None:
-    raise FileNotFoundError("Couldn't find lena-1.png")
+image = cv2.imread("data/lena.png", cv2.IMREAD_COLOR)
+if image is None:
+    raise FileNotFoundError("Could not find data/lena.png")
+h, w = image.shape[:2]
+if (h, w) != (512, 512):
+    raise ValueError(f"Lena must be 512x512; got {w}x{h}")
 
-px = img[100, 100]
+px = image[100, 100]
 print("px @ (100,100):", px)
-print("shape:", img.shape, "size:", img.size, "dtype:", img.dtype)
+print("shape:", image.shape, "size:", image.size, "dtype:", image.dtype)
 
-padded = padding(img, 100)
 
-h, w = img.shape[:2]
-cropped = cropping(img, 80, w - 130, 80, h - 130)
 
-resized = resize_image(img, 200, 200)
+# Padding
+padded = padding(image, 100)
 
+# Crop face
+cropped = cropping(image, 80, w - 130, 80, h - 130)
+
+# Resize to 200x200
+resized = resize_image(image, 200, 200)
+
+#  Manual copy
 empty_image = np.zeros((h, w, 3), dtype=np.uint8)
-manual_copy = copy(img, empty_image)
+manual_copy_img = copy(image, empty_image)
 
-gray = grayscale(img)
+# Grayscale
+gray = grayscale(image)
 
+#HSV
+hsv_image = hsv(image)
+preview_bgr = cv2.cvtColor(hsv_image, cv2.COLOR_HSV2BGR)
+
+# Color shift
 empty = np.zeros_like(image, dtype=np.uint8)
 shifted = hue_shifted(image, empty, hue=50)
 
+# Smoothing (15x15)
 smoothed = smoothing(image)
 
+#Rotations
 rot180 = rotation(image, 180)
-rot90 = rotation(image, 90)
+rot90  = rotation(image, 90)
 
 
-# Display; press 'q' to quit
+# press q to quit the display
+
 while True:
-    cv2.imshow("reflect", padded)
+    cv2.imshow("reflect (padded)", padded)
     cv2.imshow("cropped", cropped)
     cv2.imshow("resized 200x200", resized)
-    cv2.imshow("manual_copy", manual_copy)
+    cv2.imshow("manual_copy", manual_copy_img)
     cv2.imshow("grayscale", gray)
-
-    cv2.imshow("hvs image", hvs_image)
-    cv2.imshow("preview", preview_bgr)
-
-    cv2.imshow("Original", img)
-    cv2.imshow("Hue shifted (+50)", shifted)
-
-    cv2.imshow("smoothed", smoothed)
-
+    cv2.imshow("HSV preview (BGR space)", preview_bgr)
+    cv2.imshow("Original", image)
+    cv2.imshow("Hue shifted (+50 in RGB)", shifted)
+    cv2.imshow("smoothed (15x15)", smoothed)
     cv2.imshow("rot180", rot180)
     cv2.imshow("rot90", rot90)
     if (cv2.waitKey(1) & 0xFF) == ord('q'):
         break
 cv2.destroyAllWindows()
 
-# Save to NEW filenames so you don't overwrite your source
+# saves the images
+
 cv2.imwrite("out_padded.png", padded)
 cv2.imwrite("out_cropped.png", cropped)
 cv2.imwrite("out_resized_200x200.png", resized)
-cv2.imwrite("out_manual_copy.png", manual_copy)
+cv2.imwrite("out_manual_copy.png", manual_copy_img)
 cv2.imwrite("out_gray.png", gray)
-cv2.imwrite("out_hvs.png", hvs_image)
+cv2.imwrite("out_hsv.png", hsv_image)
 cv2.imwrite("out_preview.png", preview_bgr)
-cv2.imwrite("hue_shifted.png", shifted)
 cv2.imwrite("out_hue_shifted.png", shifted)
 cv2.imwrite("out_smoothed.png", smoothed)
 cv2.imwrite("out_rot180.png", rot180)
